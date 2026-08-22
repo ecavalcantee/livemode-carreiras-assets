@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>A LiveMode por dentro</title>
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
+<style>
+  /* ALTURA DA FOTO — muda só este número pra crescer ou diminuir.
+     Se mudar, ajuste também a altura do iframe: altura da foto + 56 */
+  :root{ --h: 170px; }
+
+  *{box-sizing:border-box;margin:0;padding:0}
+  html,body{overflow:hidden}
+  body{
+    background:#f4f4f4;              /* mesmo cinza do bloco da inHire */
+    font-family:'Poppins',system-ui,sans-serif;
+  }
+  .cab{display:flex;align-items:center;justify-content:space-between;gap:16px;margin:0 0 14px}
+  .tit{font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:#111;font-weight:700}
+  .setas{display:flex;gap:8px}
+  button{
+    width:36px;height:36px;border:1px solid #c9c9c9;background:#fff;color:#111;
+    font-size:16px;line-height:1;cursor:pointer;border-radius:0;
+    transition:background .15s,border-color .15s,color .15s;
+  }
+  button:hover:not(:disabled){background:#111;border-color:#111;color:#fff}
+  button:disabled{opacity:.3;cursor:default}
+  button:focus-visible{outline:2px solid #65B32E;outline-offset:2px}
+
+  .mask{overflow:hidden}
+  .faixa{
+    display:flex;gap:10px;overflow-x:auto;overflow-y:hidden;
+    scroll-snap-type:x mandatory;scroll-behavior:smooth;
+    -webkit-overflow-scrolling:touch;scrollbar-width:none;-ms-overflow-style:none;
+    padding:0 0 24px;margin:0 0 -24px;
+  }
+  .faixa::-webkit-scrollbar{display:none}
+  .faixa img{
+    height:var(--h);width:auto;flex:0 0 auto;display:block;
+    scroll-snap-align:start;object-fit:cover;
+  }
+  @media(prefers-reduced-motion:reduce){
+    .faixa{scroll-behavior:auto}
+    button{transition:none}
+  }
+</style>
+</head>
+<body>
+
+<div class="cab">
+  <p class="tit">A LiveMode por dentro</p>
+  <div class="setas">
+    <button type="button" id="ant" aria-label="Fotos anteriores">&#8592;</button>
+    <button type="button" id="prox" aria-label="Próximas fotos">&#8594;</button>
+  </div>
+</div>
+
+<div class="mask">
+  <div class="faixa" id="faixa" tabindex="0" role="group" aria-label="Fotos da LiveMode">
+    <img src="sala-de-corte-copa.jpg"        alt="Profissional de transmissão de headset acompanhando a parede de monitores da sala de corte durante uma transmissão ao vivo">
+    <img src="escritorio-neon.jpg"           alt="Escritório da LiveMode com pé-direito alto, letreiro de neon no teto e o time trabalhando nas mesas">
+    <img src="escritorio-cazetv.jpg"         alt="Equipe da CazéTV trabalhando em mesa compartilhada, com painéis de futebol nas paredes">
+    <img src="time-futebol.jpg"              alt="Time da LiveMode reunido em roda antes de uma partida de futebol society à noite">
+    <img src="festa-livemode-cazetv.jpg"     alt="Confraternização do time da LiveMode e da CazéTV em rooftop, com o letreiro das duas marcas ao fundo">
+  </div>
+</div>
+
+<script>
+  var f = document.getElementById('faixa'),
+      a = document.getElementById('ant'),
+      p = document.getElementById('prox');
+
+  function passo(){
+    var img = f.querySelector('img');
+    if (!img) return f.clientWidth * 0.7;
+    var largura = img.getBoundingClientRect().width + 10;      // foto + gap
+    var cabem = Math.max(1, Math.floor(f.clientWidth / largura) - 1);
+    return largura * cabem;                                     // anda quase uma tela
+  }
+  function estado(){
+    a.disabled = f.scrollLeft <= 2;
+    p.disabled = f.scrollLeft >= f.scrollWidth - f.clientWidth - 2;
+  }
+  a.addEventListener('click', function(){ f.scrollBy({left:-passo(), behavior:'smooth'}); });
+  p.addEventListener('click', function(){ f.scrollBy({left: passo(), behavior:'smooth'}); });
+  f.addEventListener('scroll', estado, {passive:true});
+  window.addEventListener('resize', estado);
+  f.querySelectorAll('img').forEach(function(i){ i.addEventListener('load', estado); });
+  estado();
+</script>
+</body>
+</html>
